@@ -58,36 +58,35 @@ export default function NewPropertyPage() {
       </div>
 
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">Разместить объявление</h1>
-        <p className="text-muted-foreground">Заполните форму ниже, чтобы добавить ваш объект</p>
+        <h1 className="text-3xl font-bold">Заявка на расчёт</h1>
+        <p className="text-muted-foreground">Заполните форму — мы рассчитаем стоимость и сроки изготовления</p>
       </div>
 
       <form onSubmit={handleSubmit}>
         <div className="grid gap-8 md:grid-cols-[2fr_1fr]">
           <Card>
             <CardHeader>
-              <CardTitle>Информация об объекте</CardTitle>
-              <CardDescription>Основные характеристики недвижимости</CardDescription>
+              <CardTitle>Параметры строения</CardTitle>
+              <CardDescription>Основные характеристики нужного вам модуля</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="title">Название объявления</Label>
-                <Input id="title" placeholder="например, Современная квартира в центре" required />
+                <Input id="title" placeholder="например, Бытовка 6×2.4 м с тамбуром" required />
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="type">Тип недвижимости</Label>
+                  <Label htmlFor="type">Тип строения</Label>
                   <Select required>
                     <SelectTrigger id="type">
                       <SelectValue placeholder="Выберите тип" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="house">Дом</SelectItem>
-                      <SelectItem value="apartment">Квартира</SelectItem>
-                      <SelectItem value="condo">Апартаменты</SelectItem>
-                      <SelectItem value="townhouse">Таунхаус</SelectItem>
-                      <SelectItem value="land">Участок</SelectItem>
+                      <SelectItem value="bytovka">Бытовка</SelectItem>
+                      <SelectItem value="domik">Ночной домик</SelectItem>
+                      <SelectItem value="hostblock">Хостблок</SelectItem>
+                      <SelectItem value="custom">На заказ</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -98,44 +97,44 @@ export default function NewPropertyPage() {
                       <SelectValue placeholder="Выберите статус" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="available">Доступно</SelectItem>
-                      <SelectItem value="pending">Бронь</SelectItem>
-                      <SelectItem value="sold">Продано</SelectItem>
+                      <SelectItem value="available">В наличии</SelectItem>
+                      <SelectItem value="pending">Под заказ</SelectItem>
+                      <SelectItem value="sold">Изготавливается</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="price">Цена (руб.)</Label>
-                <Input id="price" type="number" min="0" step="100000" required />
+                <Label htmlFor="price">Бюджет (руб.)</Label>
+                <Input id="price" type="number" min="0" step="10000" placeholder="Примерный бюджет" required />
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="bedrooms">Комнат</Label>
-                  <Input id="bedrooms" type="number" min="0" required />
+                  <Label htmlFor="bedrooms">Количество мест</Label>
+                  <Input id="bedrooms" type="number" min="1" placeholder="напр. 4" required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="bathrooms">Санузлов</Label>
-                  <Input id="bathrooms" type="number" min="0" step="1" required />
+                  <Input id="bathrooms" type="number" min="0" step="1" placeholder="0, 1 или 2" required />
                 </div>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="squareFeet">Площадь (м2)</Label>
-                  <Input id="squareFeet" type="number" min="0" required />
+                  <Input id="squareFeet" type="number" min="10" placeholder="напр. 18" required />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="yearBuilt">Год постройки</Label>
-                  <Input id="yearBuilt" type="number" min="1900" max={new Date().getFullYear()} required />
+                  <Label htmlFor="yearBuilt">Год изготовления</Label>
+                  <Input id="yearBuilt" type="number" min="2024" max={new Date().getFullYear() + 1} defaultValue={2024} required />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Описание</Label>
-                <Textarea id="description" placeholder="Опишите ваш объект..." className="min-h-[150px]" required />
+                <Label htmlFor="description">Пожелания по комплектации</Label>
+                <Textarea id="description" placeholder="Опишите, что важно: утепление, отопление, двери, окна, внутренняя отделка..." className="min-h-[150px]" required />
               </div>
             </CardContent>
           </Card>
@@ -143,8 +142,8 @@ export default function NewPropertyPage() {
           <div className="space-y-8">
             <Card>
               <CardHeader>
-                <CardTitle>Расположение</CardTitle>
-                <CardDescription>Где находится ваш объект?</CardDescription>
+                <CardTitle>Адрес доставки</CardTitle>
+                <CardDescription>Куда доставить готовое строение?</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-2">

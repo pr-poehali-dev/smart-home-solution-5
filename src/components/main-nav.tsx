@@ -27,15 +27,15 @@ export function MainNav() {
     },
     {
       href: "/properties",
-      label: "Объекты",
+      label: "Каталог",
       icon: Building,
       active: pathname === "/properties" || pathname.startsWith("/properties/"),
     },
     {
-      href: "/search",
-      label: "Поиск",
+      href: "/properties/new",
+      label: "Заказать",
       icon: Search,
-      active: pathname === "/search",
+      active: pathname === "/properties/new",
     },
   ]
 
@@ -60,7 +60,7 @@ export function MainNav() {
               </NavigationMenuItem>
             ))}
             <NavigationMenuItem>
-              <NavigationMenuTrigger>Полезное</NavigationMenuTrigger>
+              <NavigationMenuTrigger>Информация</NavigationMenuTrigger>
               <NavigationMenuContent>
                 <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-2">
                   <li className="row-span-3">
@@ -69,9 +69,9 @@ export function MainNav() {
                         className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
                         href="/"
                       >
-                        <div className="mb-2 mt-4 text-lg font-medium">Гид по недвижимости</div>
+                        <div className="mb-2 mt-4 text-lg font-medium">О производстве</div>
                         <p className="text-sm leading-tight text-muted-foreground">
-                          Всё, что нужно знать о покупке и продаже недвижимости
+                          Собственное производство модульных строений на металлокаркасе
                         </p>
                       </a>
                     </NavigationMenuLink>
@@ -79,9 +79,9 @@ export function MainNav() {
                   <li>
                     <Link to="/guides/buying">
                       <NavigationMenuLink className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-                        <div className="text-sm font-medium leading-none">Гид покупателя</div>
+                        <div className="text-sm font-medium leading-none">Как выбрать бытовку</div>
                         <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                          Советы для тех, кто покупает впервые
+                          Советы по выбору комплектации и размера
                         </p>
                       </NavigationMenuLink>
                     </Link>
@@ -89,9 +89,9 @@ export function MainNav() {
                   <li>
                     <Link to="/guides/selling">
                       <NavigationMenuLink className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-                        <div className="text-sm font-medium leading-none">Гид продавца</div>
+                        <div className="text-sm font-medium leading-none">Доставка и монтаж</div>
                         <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                          Как получить лучшую цену за вашу недвижимость
+                          Как организована доставка по России
                         </p>
                       </NavigationMenuLink>
                     </Link>
@@ -99,9 +99,9 @@ export function MainNav() {
                   <li>
                     <Link to="/mortgage-calculator">
                       <NavigationMenuLink className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-                        <div className="text-sm font-medium leading-none">Ипотечный калькулятор</div>
+                        <div className="text-sm font-medium leading-none">Калькулятор стоимости</div>
                         <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                          Рассчитайте ежемесячные платежи
+                          Рассчитайте стоимость вашего модуля
                         </p>
                       </NavigationMenuLink>
                     </Link>
@@ -142,21 +142,21 @@ export function MainNav() {
               className="flex items-center gap-2 rounded-lg px-3 py-2 text-lg hover:bg-accent hover:text-accent-foreground"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Гид покупателя
+              Как выбрать бытовку
             </Link>
             <Link
               to="/guides/selling"
               className="flex items-center gap-2 rounded-lg px-3 py-2 text-lg hover:bg-accent hover:text-accent-foreground"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Гид продавца
+              Доставка и монтаж
             </Link>
             <Link
               to="/mortgage-calculator"
               className="flex items-center gap-2 rounded-lg px-3 py-2 text-lg hover:bg-accent hover:text-accent-foreground"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Ипотечный калькулятор
+              Калькулятор стоимости
             </Link>
           </nav>
         </div>

@@ -9,30 +9,30 @@ export default function PropertyDetailPage() {
 
   const property = {
     id: id,
-    title: "Апартаменты с видом на реку",
-    type: "Апартаменты",
-    address: "Пресненская наб., 8, Москва-Сити",
-    price: 52000000,
-    bedrooms: 3,
+    title: "Хостблок на 8 мест 12×3 м",
+    type: "Хостблок",
+    address: "Отправка по всей России",
+    price: 890000,
+    bedrooms: 4,
     bathrooms: 2,
-    squareFeet: 145,
-    yearBuilt: 2022,
+    squareFeet: 36,
+    yearBuilt: 2024,
     status: "Доступно",
     description:
-      "Великолепные апартаменты с панорамным видом на Москву-реку и деловой центр. Панорамное остекление от пола до потолка, кухня премиум-класса с техникой Miele, просторная планировка идеальна для приёма гостей. Мастер-спальня с собственной ванной комнатой, гардеробной и выходом на террасу. В доме: 2 машиноместа, бассейн, фитнес-центр, консьерж-сервис 24/7.",
+      "Хостблок на металлокаркасе 12×3 м — готовое решение для временного проживания рабочих и персонала. Вмещает 8 человек: 4 двухъярусные кровати, 2 санузла, электрика 220В. Каркас из профильной трубы 80×80 мм, обшивка металлопрофилем. Утепление минватой 100 мм. Изготовление 7–14 дней. Возможна любая кастомизация под задачи заказчика.",
     features: [
-      "Вид на реку",
-      "Панорамное остекление",
-      "Кухня премиум-класса",
-      "Собственная терраса",
-      "Гардеробная",
-      "Паркет из дуба",
-      "Центральное кондиционирование",
-      "Прачечная в квартире",
-      "Охрана 24/7",
-      "Бассейн",
-      "Фитнес-центр",
-      "Консьерж-сервис",
+      "Металлокаркас 80×80 мм",
+      "Обшивка металлопрофилем",
+      "Утепление 100 мм (минвата)",
+      "Электрика 220В",
+      "2 санузла",
+      "8 спальных мест",
+      "Двойные входные двери",
+      "Пластиковые окна",
+      "Отопление (конвекторы)",
+      "Доставка по России",
+      "Гарантия 1 год",
+      "Изготовление от 7 дней",
     ],
     images: [
       "/placeholder.svg?height=600&width=800",
@@ -42,9 +42,9 @@ export default function PropertyDetailPage() {
       "/placeholder.svg?height=600&width=800",
     ],
     agent: {
-      name: "Анна Ковалёва",
-      phone: "+7 (495) 123-45-67",
-      email: "anna@novodom.ru",
+      name: "Менеджер МодульСтрой",
+      phone: "+7 (800) 000-00-00",
+      email: "info@modulstroy.ru",
       image: "/placeholder.svg?height=200&width=200",
     },
   }
@@ -94,7 +94,7 @@ export default function PropertyDetailPage() {
           <div className="mb-6 flex flex-wrap items-center gap-4 text-muted-foreground">
             <div className="flex items-center gap-1">
               <Bed className="h-5 w-5" />
-              <span>{property.bedrooms} комнаты</span>
+              <span>{property.bedrooms} места</span>
             </div>
             <div className="flex items-center gap-1">
               <Bath className="h-5 w-5" />
@@ -106,14 +106,14 @@ export default function PropertyDetailPage() {
             </div>
             <div className="flex items-center gap-1">
               <Calendar className="h-5 w-5" />
-              <span>Построен в {property.yearBuilt}</span>
+              <span>Год производства: {property.yearBuilt}</span>
             </div>
           </div>
         </div>
         <div className="flex flex-col items-end justify-center">
           <div className="text-3xl font-bold">{formatPrice(property.price)}</div>
           <div className="mt-4 flex gap-2">
-            <Button size="lg">Связаться с агентом</Button>
+            <Button size="lg">Заказать / Узнать цену</Button>
             <Button size="lg" variant="outline">
               <Heart className="mr-2 h-4 w-4" />
               Сохранить
@@ -189,7 +189,7 @@ export default function PropertyDetailPage() {
             </div>
             <div>
               <h3 className="font-semibold">{property.agent.name}</h3>
-              <p className="text-sm text-muted-foreground">Агент по недвижимости</p>
+              <p className="text-sm text-muted-foreground">Менеджер по продажам</p>
             </div>
           </div>
           <div className="mb-6 space-y-2">
@@ -241,10 +241,10 @@ export default function PropertyDetailPage() {
                 id="message"
                 rows={4}
                 className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                defaultValue={`Меня интересует объект "${property.title}" по адресу ${property.address}. Прошу связаться со мной для получения дополнительной информации.`}
+                defaultValue={`Здравствуйте! Меня интересует "${property.title}". Прошу связаться для уточнения комплектации и сроков изготовления.`}
               ></textarea>
             </div>
-            <Button className="w-full">Отправить сообщение</Button>
+            <Button className="w-full">Отправить заявку</Button>
           </div>
         </div>
       </div>
