@@ -13,9 +13,8 @@ import { Home, ChevronRight, X } from "lucide-react"
 const BUILDING_TYPES = ["Бытовка", "Дачный домик", "Хостблок", "Баня"]
 
 const MESSENGER_OPTIONS = [
-  { value: "whatsapp", label: "WhatsApp" },
   { value: "telegram", label: "Telegram" },
-  { value: "viber", label: "Viber" },
+  { value: "whatsapp", label: "WhatsApp" },
   { value: "phone", label: "Только звонок" },
 ]
 
@@ -146,9 +145,14 @@ export default function NewPropertyPage() {
               step={50000}
               onValueChange={setBudget}
             />
-            <div className="flex justify-between text-sm text-muted-foreground">
-              <span>от {formatPrice(budget[0])} ₽</span>
-              <span>{budget[1] >= 5000000 ? "до 5+ млн ₽" : `до ${formatPrice(budget[1])} ₽`}</span>
+            <div className="flex items-center justify-between gap-2">
+              <div className="rounded-md border bg-muted px-3 py-1.5 text-sm font-medium min-w-[100px] text-center">
+                от {formatPrice(budget[0])} ₽
+              </div>
+              <div className="h-px flex-1 bg-border" />
+              <div className="rounded-md border bg-muted px-3 py-1.5 text-sm font-medium min-w-[100px] text-center">
+                {budget[1] >= 5000000 ? "до 5+ млн ₽" : `до ${formatPrice(budget[1])} ₽`}
+              </div>
             </div>
           </CardContent>
         </Card>

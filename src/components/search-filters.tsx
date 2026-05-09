@@ -59,9 +59,14 @@ export function SearchFilters() {
           step={50000}
           onValueChange={setPriceRange}
         />
-        <div className="flex justify-between text-sm text-muted-foreground">
-          <span>{formatPrice(priceRange[0])} ₽</span>
-          <span>{priceRange[1] >= 3000000 ? "3+ млн ₽" : `${formatPrice(priceRange[1])} ₽`}</span>
+        <div className="flex items-center justify-between gap-2">
+          <div className="rounded-md border bg-muted px-2.5 py-1 text-xs font-medium">
+            от {formatPrice(priceRange[0])} ₽
+          </div>
+          <div className="h-px flex-1 bg-border" />
+          <div className="rounded-md border bg-muted px-2.5 py-1 text-xs font-medium">
+            {priceRange[1] >= 3000000 ? "до 3+ млн ₽" : `до ${formatPrice(priceRange[1])} ₽`}
+          </div>
         </div>
       </div>
 

@@ -1,12 +1,31 @@
-import { Link, useParams, useNavigate } from "react-router-dom"
+import { useState } from "react"
+import { Link, useParams } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Slider } from "@/components/ui/slider"
+import { Textarea } from "@/components/ui/textarea"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Square, Home, ChevronRight, Share2, ShoppingCart } from "lucide-react"
 import Icon from "@/components/ui/icon"
 
+const MESSENGER_OPTIONS = [
+  { value: "telegram", label: "Telegram" },
+  { value: "whatsapp", label: "WhatsApp" },
+  { value: "phone", label: "Только звонок" },
+]
+
+const fmt = (price: number) =>
+  new Intl.NumberFormat("ru-RU", { style: "currency", currency: "RUB", maximumFractionDigits: 0 }).format(price)
+
+const fmtShort = (price: number) => {
+  if (price >= 1000000) return `${(price / 1000000).toFixed(price % 1000000 === 0 ? 0 : 1)} млн`
+  return `${(price / 1000).toFixed(0)} тыс`
+}
+
 export default function PropertyDetailPage() {
   const { id } = useParams()
-  const navigate = useNavigate()
 
   const property = {
     id: id,
@@ -40,12 +59,15 @@ export default function PropertyDetailPage() {
     ],
   }
 
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat("ru-RU", {
-      style: "currency",
-      currency: "RUB",
-      maximumFractionDigits: 0,
-    }).format(price)
+  // Модалка заказа
+  const [orderOpen, setOrderOpen] = useState(false)
+  const [budget, setBudget] = useState([property.price, Math.round(property.price * 1.3)])
+  const [deliveryAddress, setDeliveryAddress] = useState("")
+  const [deliveryOpen, setDeliveryOpen] = useState(false)
+  const [wishes, setWishes] = useState("")
+  const [name, setName] = useState("")
+  const [phone, setPhone] = useState("")
+  const [messenger, setMessenger] = useState<string | null>(null)
 
   const handleShare = () => {
     if (navigator.share) {
@@ -55,6 +77,14 @@ export default function PropertyDetailPage() {
       alert("Ссылка скопирована!")
     }
   }
+
+  const handleOrderSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    alert("Заявка отправлена! Мы свяжемся с вами в ближайшее время.")
+    setOrderOpen(false)
+  }
+
+  const budgetMax = Math.max(property.price * 2, 3000000)
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -92,13 +122,9 @@ export default function PropertyDetailPage() {
           </div>
         </div>
         <div className="flex flex-col items-start sm:items-end gap-3 shrink-0">
-          <p className="text-3xl font-bold">{formatPrice(property.price)}</p>
+          <p className="text-3xl font-bold">{fmt(property.price)}</p>
           <div className="flex gap-2">
-            <Button
-              size="lg"
-              className="gap-2"
-              onClick={() => navigate("/properties/new")}
-            >
+            <Button size="lg" className="gap-2" onClick={() => setOrderOpen(true)}>
               <ShoppingCart className="h-4 w-4" />
               Заказать с доставкой
             </Button>
@@ -111,49 +137,163 @@ export default function PropertyDetailPage() {
 
       {/* Галерея 4:3 */}
       <div className="mb-8 space-y-3">
-        {/* Главное фото */}
         <div className="relative w-full overflow-hidden rounded-lg" style={{ paddingTop: "75%" }}>
-          <img
-            src={property.images[0]}
-            alt={property.title}
-            className="absolute inset-0 h-full w-full object-cover"
-          />
+          <img src={property.images[0]} alt={property.title} className="absolute inset-0 h-full w-full object-cover" />
         </div>
-        {/* Мелкие фото */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {property.images.slice(1, 5).map((image, i) => (
             <div key={i} className="relative overflow-hidden rounded-lg" style={{ paddingTop: "75%" }}>
-              <img
-                src={image}
-                alt={`${property.title} ${i + 2}`}
-                className="absolute inset-0 h-full w-full object-cover"
-              />
+              <img src={image} alt={`${property.title} ${i + 2}`} className="absolute inset-0 h-full w-full object-cover" />
             </div>
           ))}
         </div>
       </div>
 
-      {/* Описание + Характеристики (теги) */}
+      {/* Описание + Теги */}
       <div className="space-y-8">
         <div>
           <h2 className="text-xl font-semibold mb-3">Описание</h2>
           <p className="text-muted-foreground leading-relaxed">{property.description}</p>
         </div>
-
         <div>
           <h2 className="text-xl font-semibold mb-3">Характеристики</h2>
           <div className="flex flex-wrap gap-2">
             {property.tags.map((tag, i) => (
-              <span
-                key={i}
-                className="rounded-full border border-input bg-muted px-3 py-1 text-sm font-medium"
-              >
+              <span key={i} className="rounded-full border border-input bg-muted px-3 py-1 text-sm font-medium">
                 {tag}
               </span>
             ))}
           </div>
         </div>
       </div>
+
+      {/* Модалка заказа */}
+      <Dialog open={orderOpen} onOpenChange={setOrderOpen}>
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Заказать с доставкой</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleOrderSubmit} className="space-y-5 pt-1">
+
+            {/* Выбранный товар */}
+            <div className="rounded-lg border bg-muted/40 p-3 flex items-center gap-3">
+              <div className="relative w-20 shrink-0 overflow-hidden rounded-md" style={{ paddingTop: "33%" }}>
+                <img src={property.images[0]} alt={property.title} className="absolute inset-0 h-full w-full object-cover" />
+              </div>
+              <div className="min-w-0">
+                <p className="font-medium text-sm line-clamp-2">{property.title}</p>
+                <p className="text-sm text-muted-foreground">{property.squareFeet} м² · {property.dimensions}</p>
+                <p className="text-sm font-bold">{fmt(property.price)}</p>
+              </div>
+            </div>
+
+            {/* Бюджет от/до */}
+            <div className="space-y-3">
+              <Label>Бюджет</Label>
+              <Slider
+                value={budget}
+                min={100000}
+                max={budgetMax}
+                step={50000}
+                onValueChange={setBudget}
+              />
+              <div className="flex justify-between text-sm text-muted-foreground">
+                <span>от {fmtShort(budget[0])} ₽</span>
+                <span>до {budget[1] >= budgetMax ? `${fmtShort(budgetMax)}+ ₽` : `${fmtShort(budget[1])} ₽`}</span>
+              </div>
+            </div>
+
+            {/* Адрес доставки */}
+            <div className="space-y-2">
+              <Label>Адрес доставки</Label>
+              <button
+                type="button"
+                onClick={() => setDeliveryOpen(true)}
+                className="flex h-10 w-full items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm text-left hover:bg-accent transition-colors"
+              >
+                <Icon name="MapPin" size={15} className="text-muted-foreground shrink-0" />
+                <span className={deliveryAddress ? "text-foreground" : "text-muted-foreground"}>
+                  {deliveryAddress || "Укажите адрес доставки"}
+                </span>
+              </button>
+            </div>
+
+            {/* Пожелания */}
+            <div className="space-y-2">
+              <Label htmlFor="wishes">Пожелания</Label>
+              <Textarea
+                id="wishes"
+                placeholder="Утепление, цвет, дополнительные двери, планировка..."
+                value={wishes}
+                onChange={(e) => setWishes(e.target.value)}
+                className="min-h-[80px]"
+              />
+            </div>
+
+            {/* Имя + Телефон */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="order-name">Ваше имя</Label>
+                <Input id="order-name" placeholder="Иван" value={name} onChange={(e) => setName(e.target.value)} required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="order-phone">Телефон</Label>
+                <Input id="order-phone" type="tel" placeholder="+7 (___) ___-__-__" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+              </div>
+            </div>
+
+            {/* Мессенджер */}
+            <div className="space-y-2">
+              <Label>Куда написать</Label>
+              <div className="grid grid-cols-3 gap-2">
+                {MESSENGER_OPTIONS.map((m) => (
+                  <button
+                    key={m.value}
+                    type="button"
+                    onClick={() => setMessenger(messenger === m.value ? null : m.value)}
+                    className={`rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
+                      messenger === m.value
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-input bg-background hover:bg-accent hover:text-accent-foreground"
+                    }`}
+                  >
+                    {m.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <Button type="submit" size="lg" className="w-full">
+              Оставить заявку
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Диалог адреса */}
+      <Dialog open={deliveryOpen} onOpenChange={setDeliveryOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Адрес доставки</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-1">
+            <div className="space-y-2">
+              <Label>Введите адрес</Label>
+              <Input
+                placeholder="Город, улица, дом..."
+                value={deliveryAddress}
+                onChange={(e) => setDeliveryAddress(e.target.value)}
+              />
+            </div>
+            <div className="flex h-44 items-center justify-center rounded-md border bg-muted flex-col gap-2 text-muted-foreground">
+              <Icon name="Map" size={30} />
+              <span className="text-sm">Выбор по карте</span>
+              <span className="text-xs text-center px-6">Будет подключена после настройки API</span>
+            </div>
+            <Button className="w-full" onClick={() => setDeliveryOpen(false)}>Подтвердить адрес</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
