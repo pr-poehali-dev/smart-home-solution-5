@@ -1,9 +1,26 @@
 import { Link } from "react-router-dom"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { PropertyCard } from "@/components/property-card"
-import { MapPin, Home, Building, Filter } from "lucide-react"
+import { Slider } from "@/components/ui/slider"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import Icon from "@/components/ui/icon"
+import { Home, Building, Filter } from "lucide-react"
+
+const BUILDING_TYPES = [
+  { value: "bytovka", label: "Бытовка" },
+  { value: "dacha", label: "Дачный домик" },
+  { value: "hostblock", label: "Хостблок" },
+  { value: "banya", label: "Баня" },
+]
 
 export default function HomePage() {
+  const [priceRange, setPriceRange] = useState([100000, 3000000])
+  const [selectedType, setSelectedType] = useState<string | null>(null)
+  const [deliveryAddress, setDeliveryAddress] = useState("")
+  const [deliveryOpen, setDeliveryOpen] = useState(false)
   const featuredProperties = [
     {
       id: "1",
@@ -17,6 +34,7 @@ export default function HomePage() {
       yearBuilt: 2024,
       status: "Доступно",
       imageUrl: "/placeholder.svg?height=300&width=400",
+      dimensions: "6×2.4×2.5 м",
     },
     {
       id: "2",
@@ -30,6 +48,7 @@ export default function HomePage() {
       yearBuilt: 2024,
       status: "Доступно",
       imageUrl: "/placeholder.svg?height=300&width=400",
+      dimensions: "6×3×2.7 м",
     },
     {
       id: "3",
@@ -43,6 +62,7 @@ export default function HomePage() {
       yearBuilt: 2024,
       status: "Доступно",
       imageUrl: "/placeholder.svg?height=300&width=400",
+      dimensions: "12×3×2.7 м",
     },
   ]
 
@@ -76,81 +96,98 @@ export default function HomePage() {
               </div>
             </div>
             <div className="flex items-center justify-center">
-              <div className="w-full max-w-md rounded-lg border bg-background p-4 shadow-sm">
+              <div className="w-full max-w-md rounded-lg border bg-background p-5 shadow-sm">
                 <div className="flex items-center gap-2 pb-4">
                   <Filter className="h-5 w-5 text-muted-foreground" />
                   <h2 className="text-lg font-semibold">Быстрый поиск</h2>
                 </div>
-                <div className="grid gap-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                        Цена от
-                      </label>
-                      <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-                        <option value="">Любая</option>
-                        <option value="100000">100 тыс</option>
-                        <option value="300000">300 тыс</option>
-                        <option value="500000">500 тыс</option>
-                        <option value="1000000">1 млн</option>
-                      </select>
+                <div className="grid gap-5">
+
+                  {/* Ползунок цены */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium">Бюджет</label>
+                      <span className="text-sm text-muted-foreground">
+                        {(priceRange[0] / 1000).toFixed(0)} тыс — {priceRange[1] >= 3000000 ? "3+ млн" : (priceRange[1] / 1000).toFixed(0) + " тыс"} ₽
+                      </span>
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                        Цена до
-                      </label>
-                      <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-                        <option value="">Любая</option>
-                        <option value="300000">300 тыс</option>
-                        <option value="600000">600 тыс</option>
-                        <option value="1000000">1 млн</option>
-                        <option value="3000000">3+ млн</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                        Мест / блоков
-                      </label>
-                      <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-                        <option value="">Любое</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="4">4</option>
-                        <option value="8">8+</option>
-                      </select>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                        С санузлом
-                      </label>
-                      <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-                        <option value="">Любое</option>
-                        <option value="yes">Да</option>
-                        <option value="no">Нет</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                      Тип строения
-                    </label>
-                    <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-                      <option value="">Любой</option>
-                      <option value="bytovka">Бытовка</option>
-                      <option value="domik">Ночной домик</option>
-                      <option value="hostblock">Хостблок</option>
-                    </select>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-muted-foreground" />
-                    <input
-                      type="text"
-                      placeholder="Ваш регион доставки"
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    <Slider
+                      value={priceRange}
+                      min={100000}
+                      max={3000000}
+                      step={50000}
+                      onValueChange={setPriceRange}
                     />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>100 тыс</span>
+                      <span>3+ млн</span>
+                    </div>
                   </div>
+
+                  {/* Тип строения — кнопки */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Тип строения</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {BUILDING_TYPES.map((t) => (
+                        <button
+                          key={t.value}
+                          type="button"
+                          onClick={() => setSelectedType(selectedType === t.value ? null : t.value)}
+                          className={`rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
+                            selectedType === t.value
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "border-input bg-background hover:bg-accent hover:text-accent-foreground"
+                          }`}
+                        >
+                          {t.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Доставка */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Адрес доставки</label>
+                    <Dialog open={deliveryOpen} onOpenChange={setDeliveryOpen}>
+                      <DialogTrigger asChild>
+                        <button
+                          type="button"
+                          className="flex h-10 w-full items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm text-left hover:bg-accent transition-colors"
+                        >
+                          <Icon name="MapPin" size={16} className="text-muted-foreground shrink-0" />
+                          <span className={deliveryAddress ? "text-foreground" : "text-muted-foreground"}>
+                            {deliveryAddress || "Укажите адрес доставки"}
+                          </span>
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Адрес доставки</DialogTitle>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-2">
+                          <div className="space-y-2">
+                            <Label>Введите адрес вручную</Label>
+                            <Input
+                              placeholder="Город, улица, дом..."
+                              value={deliveryAddress}
+                              onChange={(e) => setDeliveryAddress(e.target.value)}
+                            />
+                          </div>
+                          <div className="relative rounded-md border bg-muted overflow-hidden" style={{ height: 200 }}>
+                            <div className="flex h-full flex-col items-center justify-center gap-2 text-muted-foreground">
+                              <Icon name="Map" size={32} />
+                              <span className="text-sm">Выбор по карте</span>
+                              <span className="text-xs text-center px-4">Карта будет подключена после настройки API-ключа</span>
+                            </div>
+                          </div>
+                          <Button onClick={() => setDeliveryOpen(false)} className="w-full">
+                            Подтвердить адрес
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+
                   <Link to="/properties">
                     <Button className="w-full">Найти строения</Button>
                   </Link>

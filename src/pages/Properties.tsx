@@ -19,6 +19,7 @@ export default function PropertiesPage() {
       yearBuilt: 2024,
       status: "Доступно",
       imageUrl: "/placeholder.svg?height=300&width=400",
+      dimensions: "6×2.4×2.5 м",
     },
     {
       id: "2",
@@ -32,6 +33,7 @@ export default function PropertiesPage() {
       yearBuilt: 2024,
       status: "Доступно",
       imageUrl: "/placeholder.svg?height=300&width=400",
+      dimensions: "6×3×2.5 м",
     },
     {
       id: "3",
@@ -45,6 +47,7 @@ export default function PropertiesPage() {
       yearBuilt: 2024,
       status: "Доступно",
       imageUrl: "/placeholder.svg?height=300&width=400",
+      dimensions: "6×3×2.7 м",
     },
     {
       id: "4",
@@ -58,6 +61,7 @@ export default function PropertiesPage() {
       yearBuilt: 2024,
       status: "Доступно",
       imageUrl: "/placeholder.svg?height=300&width=400",
+      dimensions: "8×3×2.7 м",
     },
     {
       id: "5",
@@ -71,6 +75,7 @@ export default function PropertiesPage() {
       yearBuilt: 2024,
       status: "Доступно",
       imageUrl: "/placeholder.svg?height=300&width=400",
+      dimensions: "6×3×2.7 м",
     },
     {
       id: "6",
@@ -84,6 +89,7 @@ export default function PropertiesPage() {
       yearBuilt: 2024,
       status: "Доступно",
       imageUrl: "/placeholder.svg?height=300&width=400",
+      dimensions: "12×3×2.7 м",
     },
   ]
 
