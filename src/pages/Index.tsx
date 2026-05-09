@@ -198,6 +198,72 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Баннер с парнем */}
+      <section className="relative overflow-hidden bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900">
+        <div className="container px-4 md:px-6">
+          <div className="grid items-end lg:grid-cols-[1fr_auto_1fr] min-h-[380px] md:min-h-[460px]">
+            {/* Левый текст */}
+            <div className="flex flex-col justify-center gap-4 py-12 pr-6 z-10">
+              <p className="text-sm font-semibold uppercase tracking-widest text-red-400">Собственное производство</p>
+              <h2 className="text-3xl font-bold leading-tight text-white md:text-4xl lg:text-5xl">
+                Строим быстро.<br />Доставляем по всей России.
+              </h2>
+              <p className="text-slate-400 max-w-sm md:text-lg">
+                Бытовки, дачные домики, хостблоки и бани на металлокаркасе. Изготовление от 7 дней.
+              </p>
+              <div className="flex flex-wrap gap-3 pt-2">
+                <Link to="/properties">
+                  <Button size="lg" className="bg-red-600 hover:bg-red-700 text-white border-0">
+                    Смотреть каталог
+                  </Button>
+                </Link>
+                <Link to="/properties/new">
+                  <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10">
+                    Заказать расчёт
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Парень по центру */}
+            <div className="hidden lg:flex items-end justify-center self-end z-10" style={{ marginBottom: 0 }}>
+              <img
+                src="https://cdn.poehali.dev/projects/bc841fec-1189-4eea-854d-8066280392e4/bucket/be422675-e95a-46b9-96a7-02a66c484ed9.png"
+                alt="МодульСтрой"
+                className="h-[380px] md:h-[460px] w-auto object-contain object-bottom select-none"
+                draggable={false}
+              />
+            </div>
+
+            {/* Правые карточки-факты */}
+            <div className="hidden lg:flex flex-col justify-center gap-4 py-12 pl-6 z-10">
+              {[
+                { num: "7", unit: "дней", label: "срок изготовления" },
+                { num: "500+", unit: "", label: "объектов сдано" },
+                { num: "1", unit: "год", label: "гарантия на конструкцию" },
+              ].map((item) => (
+                <div key={item.label} className="rounded-xl border border-white/10 bg-white/5 px-5 py-4 backdrop-blur-sm">
+                  <p className="text-2xl font-bold text-white">
+                    {item.num} <span className="text-red-400">{item.unit}</span>
+                  </p>
+                  <p className="text-sm text-slate-400 mt-0.5">{item.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Мобильное фото */}
+        <div className="lg:hidden flex justify-center pb-8 px-4">
+          <img
+            src="https://cdn.poehali.dev/projects/bc841fec-1189-4eea-854d-8066280392e4/bucket/be422675-e95a-46b9-96a7-02a66c484ed9.png"
+            alt="МодульСтрой"
+            className="max-h-64 w-auto object-contain"
+            draggable={false}
+          />
+        </div>
+      </section>
+
       <section className="py-12">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-between gap-4 pb-8 md:flex-row">
