@@ -1,375 +1,243 @@
 import type React from "react"
-
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Home, ChevronRight, Upload, X } from "lucide-react"
+import { Slider } from "@/components/ui/slider"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import Icon from "@/components/ui/icon"
+import { Home, ChevronRight, X } from "lucide-react"
+
+const BUILDING_TYPES = ["Бытовка", "Дачный домик", "Хостблок", "Баня"]
+
+const MESSENGER_OPTIONS = [
+  { value: "whatsapp", label: "WhatsApp" },
+  { value: "telegram", label: "Telegram" },
+  { value: "viber", label: "Viber" },
+  { value: "phone", label: "Только звонок" },
+]
+
+const formatPrice = (price: number) => {
+  if (price >= 1000000) return `${(price / 1000000).toFixed(price % 1000000 === 0 ? 0 : 1)} млн`
+  return `${(price / 1000).toFixed(0)} тыс`
+}
 
 export default function NewPropertyPage() {
   const [images, setImages] = useState<string[]>([])
-  const [amenities, setAmenities] = useState({
-    pool: false,
-    garage: false,
-    garden: false,
-    balcony: false,
-    elevator: false,
-    airConditioning: false,
-    furnished: false,
-    petFriendly: false,
-  })
+  const [selectedType, setSelectedType] = useState<string | null>(null)
+  const [budget, setBudget] = useState([300000, 1500000])
+  const [deliveryAddress, setDeliveryAddress] = useState("")
+  const [deliveryOpen, setDeliveryOpen] = useState(false)
+  const [messenger, setMessenger] = useState<string | null>(null)
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const newImages = Array.from(e.target.files).map((file) => URL.createObjectURL(file))
-      setImages([...images, ...newImages])
+      setImages((prev) => [...prev, ...newImages].slice(0, 10))
     }
   }
 
   const removeImage = (index: number) => {
-    const newImages = [...images]
-    newImages.splice(index, 1)
-    setImages(newImages)
+    setImages((prev) => prev.filter((_, i) => i !== index))
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    alert("Объявление успешно создано!")
+    alert("Заявка отправлена! Мы свяжемся с вами в ближайшее время.")
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 max-w-2xl">
       <div className="mb-6 flex items-center gap-2 text-sm text-muted-foreground">
         <Link to="/" className="flex items-center gap-1 hover:text-foreground">
           <Home className="h-4 w-4" />
           Главная
         </Link>
         <ChevronRight className="h-4 w-4" />
-        <Link to="/properties" className="hover:text-foreground">
-          Объекты
-        </Link>
-        <ChevronRight className="h-4 w-4" />
-        <span className="text-foreground">Новое объявление</span>
+        <span className="text-foreground">Заказать</span>
       </div>
 
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Заявка на расчёт</h1>
-        <p className="text-muted-foreground">Заполните форму — мы рассчитаем стоимость и сроки изготовления</p>
+        <p className="text-muted-foreground">Заполните форму — мы перезвоним и рассчитаем стоимость</p>
       </div>
 
-      <form onSubmit={handleSubmit}>
-        <div className="grid gap-8 md:grid-cols-[2fr_1fr]">
-          <Card>
-            <CardHeader>
-              <CardTitle>Параметры строения</CardTitle>
-              <CardDescription>Основные характеристики нужного вам модуля</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="title">Название объявления</Label>
-                <Input id="title" placeholder="например, Бытовка 6×2.4 м с тамбуром" required />
-              </div>
+      <form onSubmit={handleSubmit} className="space-y-6">
 
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="type">Тип строения</Label>
-                  <Select required>
-                    <SelectTrigger id="type">
-                      <SelectValue placeholder="Выберите тип" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="bytovka">Бытовка</SelectItem>
-                      <SelectItem value="domik">Ночной домик</SelectItem>
-                      <SelectItem value="hostblock">Хостблок</SelectItem>
-                      <SelectItem value="custom">На заказ</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="status">Статус</Label>
-                  <Select required>
-                    <SelectTrigger id="status">
-                      <SelectValue placeholder="Выберите статус" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="available">В наличии</SelectItem>
-                      <SelectItem value="pending">Под заказ</SelectItem>
-                      <SelectItem value="sold">Изготавливается</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="price">Бюджет (руб.)</Label>
-                <Input id="price" type="number" min="0" step="10000" placeholder="Примерный бюджет" required />
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="bedrooms">Количество мест</Label>
-                  <Input id="bedrooms" type="number" min="1" placeholder="напр. 4" required />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="bathrooms">Санузлов</Label>
-                  <Input id="bathrooms" type="number" min="0" step="1" placeholder="0, 1 или 2" required />
-                </div>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="squareFeet">Площадь (м2)</Label>
-                  <Input id="squareFeet" type="number" min="10" placeholder="напр. 18" required />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="yearBuilt">Год изготовления</Label>
-                  <Input id="yearBuilt" type="number" min="2024" max={new Date().getFullYear() + 1} defaultValue={2024} required />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description">Пожелания по комплектации</Label>
-                <Textarea id="description" placeholder="Опишите, что важно: утепление, отопление, двери, окна, внутренняя отделка..." className="min-h-[150px]" required />
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="space-y-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>Адрес доставки</CardTitle>
-                <CardDescription>Куда доставить готовое строение?</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="street">Адрес</Label>
-                  <Input id="street" required />
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="city">Город</Label>
-                    <Input id="city" required />
+        {/* Фото */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Фото / эскиз</CardTitle>
+            <CardDescription>Загрузите референс или эскиз, если есть (до 10 фото)</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <label
+              htmlFor="photo-upload"
+              className="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-input bg-background p-6 text-center cursor-pointer hover:bg-accent transition-colors"
+            >
+              <Icon name="Upload" size={28} className="text-muted-foreground" />
+              <span className="text-sm font-medium">Нажмите или перетащите файлы</span>
+              <span className="text-xs text-muted-foreground">JPG, PNG, WEBP до 10 МБ</span>
+              <input
+                id="photo-upload"
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={handleImageUpload}
+              />
+            </label>
+            {images.length > 0 && (
+              <div className="mt-4 grid grid-cols-3 gap-3">
+                {images.map((src, i) => (
+                  <div key={i} className="relative rounded-md overflow-hidden" style={{ paddingTop: "75%" }}>
+                    <img src={src} alt={`preview-${i}`} className="absolute inset-0 h-full w-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(i)}
+                      className="absolute top-1 right-1 rounded-full bg-black/60 p-0.5 text-white hover:bg-black/80"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="state">Район/Область</Label>
-                    <Input id="state" required />
-                  </div>
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="zip">Индекс</Label>
-                    <Input id="zip" required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="country">Страна</Label>
-                    <Input id="country" defaultValue="Россия" required />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Контактная информация</CardTitle>
-                <CardDescription>Как с вами связаться?</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="contactName">Контактное лицо</Label>
-                  <Input id="contactName" required />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="contactEmail">Email</Label>
-                  <Input id="contactEmail" type="email" required />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="contactPhone">Телефон</Label>
-                  <Input id="contactPhone" type="tel" required />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        <div className="mt-8 grid gap-8 md:grid-cols-[2fr_1fr]">
-          <Card>
-            <CardHeader>
-              <CardTitle>Фотографии</CardTitle>
-              <CardDescription>Загрузите фото объекта (до 10 штук)</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="mb-4">
-                <Label
-                  htmlFor="images"
-                  className="flex h-32 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-input bg-muted/50 px-4 py-5 text-center"
+        {/* Тип строения */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Тип строения</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-3">
+              {BUILDING_TYPES.map((type) => (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => setSelectedType(selectedType === type ? null : type)}
+                  className={`rounded-md border px-4 py-3 text-sm font-medium text-center transition-colors ${
+                    selectedType === type
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-input bg-background hover:bg-accent hover:text-accent-foreground"
+                  }`}
                 >
-                  <Upload className="mb-2 h-6 w-6 text-muted-foreground" />
-                  <div className="text-sm text-muted-foreground">
-                    <span className="font-semibold">Нажмите для загрузки</span> или перетащите файлы
+                  {type}
+                </button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Бюджет */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Бюджет</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Slider
+              value={budget}
+              min={100000}
+              max={5000000}
+              step={50000}
+              onValueChange={setBudget}
+            />
+            <div className="flex justify-between text-sm text-muted-foreground">
+              <span>от {formatPrice(budget[0])} ₽</span>
+              <span>{budget[1] >= 5000000 ? "до 5+ млн ₽" : `до ${formatPrice(budget[1])} ₽`}</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Адрес доставки */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Адрес доставки</CardTitle>
+            <CardDescription>Куда доставить готовое строение?</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Dialog open={deliveryOpen} onOpenChange={setDeliveryOpen}>
+              <DialogTrigger asChild>
+                <button
+                  type="button"
+                  className="flex h-10 w-full items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm text-left hover:bg-accent transition-colors"
+                >
+                  <Icon name="MapPin" size={16} className="text-muted-foreground shrink-0" />
+                  <span className={deliveryAddress ? "text-foreground" : "text-muted-foreground"}>
+                    {deliveryAddress || "Укажите адрес доставки"}
+                  </span>
+                </button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Адрес доставки</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-2">
+                  <div className="space-y-2">
+                    <Label>Введите адрес</Label>
+                    <Input
+                      placeholder="Город, улица, дом..."
+                      value={deliveryAddress}
+                      onChange={(e) => setDeliveryAddress(e.target.value)}
+                    />
                   </div>
-                  <p className="text-xs text-muted-foreground">PNG, JPG или WEBP (макс. 5 МБ на изображение)</p>
-                  <input
-                    id="images"
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    className="sr-only"
-                    onChange={handleImageUpload}
-                    disabled={images.length >= 10}
-                  />
-                </Label>
+                  <div className="flex h-44 items-center justify-center rounded-md border bg-muted flex-col gap-2 text-muted-foreground">
+                    <Icon name="Map" size={30} />
+                    <span className="text-sm">Выбор по карте</span>
+                    <span className="text-xs text-center px-6">Будет подключена после настройки API</span>
+                  </div>
+                  <Button onClick={() => setDeliveryOpen(false)}>Подтвердить адрес</Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </CardContent>
+        </Card>
+
+        {/* Контакты */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Как с вами связаться</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="name">Ваше имя</Label>
+                <Input id="name" placeholder="Иван" required />
               </div>
-
-              {images.length > 0 && (
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-                  {images.map((image, index) => (
-                    <div key={index} className="relative aspect-square overflow-hidden rounded-lg border">
-                      <img
-                        src={image || "/placeholder.svg"}
-                        alt={`Фото ${index + 1}`}
-                        className="h-full w-full object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeImage(index)}
-                        className="absolute right-1 top-1 rounded-full bg-background p-1 shadow-sm"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Удобства</CardTitle>
-              <CardDescription>Выберите все, что есть в вашем объекте</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="amenity-pool"
-                    checked={amenities.pool}
-                    onCheckedChange={(checked) => setAmenities({ ...amenities, pool: !!checked })}
-                  />
-                  <label
-                    htmlFor="amenity-pool"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    Бассейн
-                  </label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="amenity-garage"
-                    checked={amenities.garage}
-                    onCheckedChange={(checked) => setAmenities({ ...amenities, garage: !!checked })}
-                  />
-                  <label
-                    htmlFor="amenity-garage"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    Гараж
-                  </label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="amenity-garden"
-                    checked={amenities.garden}
-                    onCheckedChange={(checked) => setAmenities({ ...amenities, garden: !!checked })}
-                  />
-                  <label
-                    htmlFor="amenity-garden"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    Сад
-                  </label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="amenity-balcony"
-                    checked={amenities.balcony}
-                    onCheckedChange={(checked) => setAmenities({ ...amenities, balcony: !!checked })}
-                  />
-                  <label
-                    htmlFor="amenity-balcony"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    Балкон
-                  </label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="amenity-elevator"
-                    checked={amenities.elevator}
-                    onCheckedChange={(checked) => setAmenities({ ...amenities, elevator: !!checked })}
-                  />
-                  <label
-                    htmlFor="amenity-elevator"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    Лифт
-                  </label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="amenity-ac"
-                    checked={amenities.airConditioning}
-                    onCheckedChange={(checked) => setAmenities({ ...amenities, airConditioning: !!checked })}
-                  />
-                  <label
-                    htmlFor="amenity-ac"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    Кондиционер
-                  </label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="amenity-furnished"
-                    checked={amenities.furnished}
-                    onCheckedChange={(checked) => setAmenities({ ...amenities, furnished: !!checked })}
-                  />
-                  <label
-                    htmlFor="amenity-furnished"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    С мебелью
-                  </label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="amenity-pet"
-                    checked={amenities.petFriendly}
-                    onCheckedChange={(checked) => setAmenities({ ...amenities, petFriendly: !!checked })}
-                  />
-                  <label
-                    htmlFor="amenity-pet"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    Можно с питомцами
-                  </label>
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">Номер телефона</Label>
+                <Input id="phone" type="tel" placeholder="+7 (___) ___-__-__" required />
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Куда написать</Label>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {MESSENGER_OPTIONS.map((m) => (
+                  <button
+                    key={m.value}
+                    type="button"
+                    onClick={() => setMessenger(messenger === m.value ? null : m.value)}
+                    className={`rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
+                      messenger === m.value
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-input bg-background hover:bg-accent hover:text-accent-foreground"
+                    }`}
+                  >
+                    {m.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-        <div className="mt-8 flex justify-end gap-4">
-          <Link to="/properties">
-            <Button variant="outline">Отмена</Button>
-          </Link>
-          <Button type="submit">Опубликовать</Button>
-        </div>
+        <Button type="submit" size="lg" className="w-full">
+          Отправить заявку
+        </Button>
       </form>
     </div>
   )
