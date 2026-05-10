@@ -124,7 +124,9 @@
     line-height: 1.15;
     color: var(--black);
   }
-  @apply border-border;
+  * {
+    border-color: hsl(var(--border));
+  }
 }
 
 /* Scrollbar */
