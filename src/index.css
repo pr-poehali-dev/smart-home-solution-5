@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -8,67 +8,95 @@
   .text-balance {
     text-wrap: balance;
   }
-  .card-shadow {
+
+  .shadow-card {
     box-shadow:
-      0 1px 3px rgba(0, 0, 0, 0.06),
-      0 4px 16px rgba(0, 0, 0, 0.06);
+      0 0 0 1px rgba(0, 0, 0, 0.06),
+      0 2px 8px rgba(0, 0, 0, 0.04);
   }
-  .card-shadow-hover {
+  .shadow-card-hover {
     box-shadow:
-      0 4px 12px rgba(0, 0, 0, 0.08),
-      0 16px 48px rgba(0, 0, 0, 0.1);
+      0 0 0 1px rgba(0, 0, 0, 0.08),
+      0 8px 32px rgba(0, 0, 0, 0.08);
   }
-  .card-lift {
+  .hover-lift {
     transition:
-      transform 0.25s ease,
-      box-shadow 0.25s ease;
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
   }
-  .card-lift:hover {
-    transform: translateY(-4px);
+  .hover-lift:hover {
+    transform: translateY(-3px);
+    box-shadow:
+      0 0 0 1px rgba(0, 0, 0, 0.08),
+      0 8px 32px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Image crossfade on hover */
+  .img-wrap {
+    position: relative;
+    overflow: hidden;
+  }
+  .img-wrap img.img-a {
+    transition: opacity 0.35s ease;
+  }
+  .img-wrap img.img-b {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .img-wrap:hover img.img-a {
+    opacity: 0;
+  }
+  .img-wrap:hover img.img-b {
+    opacity: 1;
   }
 }
 
 @layer base {
   :root {
-    --bg: #f7f7f5;
-    --bg-white: #ffffff;
-    --bg-gray: #f2f2f0;
-    --text: #111111;
-    --text-secondary: #6b7280;
-    --text-tertiary: #9ca3af;
+    --white: #ffffff;
+    --gray-50: #f8f8f8;
+    --gray-100: #f0f0f0;
+    --gray-200: #e4e4e4;
+    --gray-400: #9b9b9b;
+    --gray-600: #6b6b6b;
+    --black: #0f0f0f;
     --red: #e53935;
-    --red-hover: #c62828;
-    --border: #e5e5e3;
-    --border-light: #ebebea;
-    --radius-card: 16px;
-    --radius-btn: 10px;
+    --red-dk: #c62828;
+    --radius: 12px;
 
-    --background: 0 0% 97%;
-    --foreground: 0 0% 7%;
+    /* shadcn tokens */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 6%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 7%;
+    --card-foreground: 0 0% 6%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 7%;
+    --popover-foreground: 0 0% 6%;
     --primary: 2 74% 56%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 7%;
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
-    --accent: 0 0% 94%;
-    --accent-foreground: 0 0% 7%;
+    --secondary: 0 0% 95%;
+    --secondary-foreground: 0 0% 6%;
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 42%;
+    --accent: 0 0% 93%;
+    --accent-foreground: 0 0% 6%;
     --destructive: 2 74% 56%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
+    --border: 0 0% 89%;
+    --input: 0 0% 89%;
     --ring: 2 74% 56%;
-    --radius: 0.625rem;
+    --radius: 0.5rem;
   }
 }
 
 @layer base {
-  * {
-    @apply border-border;
+  *,
+  *::before,
+  *::after {
     box-sizing: border-box;
   }
   html {
@@ -79,66 +107,49 @@
       "Inter",
       -apple-system,
       BlinkMacSystemFont,
-      "Segoe UI",
       sans-serif;
-    background-color: var(--bg);
-    color: var(--text);
+    background: var(--white);
+    color: var(--black);
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
     font-size: 15px;
-    line-height: 1.6;
+    line-height: 1.65;
   }
   h1,
   h2,
   h3,
   h4,
   h5 {
-    font-family: "Inter", sans-serif;
     font-weight: 700;
-    letter-spacing: -0.02em;
-    line-height: 1.2;
-    color: var(--text);
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+    color: var(--black);
   }
+  @apply border-border;
 }
 
+/* Scrollbar */
 ::-webkit-scrollbar {
-  width: 5px;
+  width: 4px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--bg);
+  background: var(--gray-50);
 }
 ::-webkit-scrollbar-thumb {
-  background: #d1d1cf;
-  border-radius: 3px;
+  background: var(--gray-200);
+  border-radius: 2px;
 }
 
+/* Animations */
 @keyframes fadeUp {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
-.fade-up {
-  animation: fadeUp 0.5s ease forwards;
-}
-
-/* Product card hover image swap */
-.product-card .img-hover {
-  opacity: 0;
-  transition: opacity 0.4s ease;
-  position: absolute;
-  inset: 0;
-}
-.product-card:hover .img-hover {
-  opacity: 1;
-}
-.product-card:hover .img-main {
-  opacity: 0;
-}
-.img-main {
-  transition: opacity 0.4s ease;
+.anim-up {
+  animation: fadeUp 0.45s ease both;
 }
