@@ -1,299 +1,292 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Link, useParams } from "react-router-dom"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Slider } from "@/components/ui/slider"
 import { Textarea } from "@/components/ui/textarea"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Square, Home, ChevronRight, Share2, ShoppingCart } from "lucide-react"
 import Icon from "@/components/ui/icon"
+import { api } from "@/lib/api"
 
-const MESSENGER_OPTIONS = [
-  { value: "telegram", label: "Telegram" },
-  { value: "whatsapp", label: "WhatsApp" },
-  { value: "phone", label: "Только звонок" },
+const CABIN_IMAGE = "https://cdn.poehali.dev/projects/bc841fec-1189-4eea-854d-8066280392e4/files/f7142cb7-a7a3-4830-b4c0-37d7d57b5d57.jpg"
+const FACTORY_IMAGE = "https://cdn.poehali.dev/projects/bc841fec-1189-4eea-854d-8066280392e4/files/2ba009f3-456b-4910-bf53-ad0b06374dce.jpg"
+const HERO_IMAGE = "https://cdn.poehali.dev/projects/bc841fec-1189-4eea-854d-8066280392e4/files/aa6a31fa-0e86-4f84-9741-5df84ca11964.jpg"
+const PRODUCT_IMAGE = "https://cdn.poehali.dev/projects/bc841fec-1189-4eea-854d-8066280392e4/files/921f3008-7ef0-4113-9f74-dc48c87d7ccc.jpg"
+
+const STATIC_PRODUCTS: Record<string, {
+  id: string; name: string; type: string; price: number; area: number; dims: string;
+  desc: string; tags: string[]; imgs: string[]; badge: string;
+}> = {
+  "1": { id: "1", name: "Бытовка строительная 6×2.4 м", type: "Бытовка", price: 189000, area: 14, dims: "6×2.4×2.5 м", badge: "ХИТ",
+    desc: "Классическая строительная бытовка на металлокаркасе. Надёжная, тёплая, готова к работе. Утепление 100 мм минватой, металлопрофиль снаружи, вагонка внутри. Электрика 220В. Изготовление 7–10 дней.",
+    tags: ["Металлокаркас 80×80 мм", "Минвата 100 мм", "Металлопрофиль", "Вагонка", "Электрика 220В", "Пластиковые окна", "Гарантия 1 год", "Доставка по РФ"],
+    imgs: [PRODUCT_IMAGE, CABIN_IMAGE, FACTORY_IMAGE, HERO_IMAGE] },
+  "2": { id: "2", name: "Бытовка с тамбуром 6×3 м", type: "Бытовка", price: 245000, area: 18, dims: "6×3×2.5 м", badge: "В наличии",
+    desc: "Бытовка с отдельным тамбуром — меньше теплопотерь, удобный вход. Утепление 100 мм, металлосайдинг, полы с утеплением. Электрика 220В, освещение.",
+    tags: ["Тамбур", "Минвата 100 мм", "Металлосайдинг", "Утеплённый пол", "Электрика 220В", "Гарантия 1 год"],
+    imgs: [PRODUCT_IMAGE, FACTORY_IMAGE, CABIN_IMAGE, HERO_IMAGE] },
+  "3": { id: "3", name: "Дачный домик с террасой 6×4 м", type: "Дачный домик", price: 420000, area: 24, dims: "6×4×3 м", badge: "Можно жить зимой",
+    desc: "Уютный дачный домик с открытой террасой. Утепление 150 мм — комфортно при −40°C. Металлосайдинг снаружи, вагонка внутри. Санузел, большие панорамные окна.",
+    tags: ["Терраса", "Минвата 150 мм", "Санузел", "Панорамные окна", "Металлосайдинг", "Электрика 220В", "Зима −40°C", "Гарантия 1 год"],
+    imgs: [CABIN_IMAGE, HERO_IMAGE, PRODUCT_IMAGE, FACTORY_IMAGE] },
+  "4": { id: "4", name: "Блок-контейнер под офис", type: "Блок-контейнер", price: 320000, area: 14, dims: "6×2.4×2.6 м", badge: "В наличии",
+    desc: "Блок-контейнер под мобильный офис или склад. Металлопрофиль, двойные двери, вентиляция, электрика, освещение. Быстрый монтаж, лёгкий перенос.",
+    tags: ["Металлопрофиль", "Двойные двери", "Вентиляция", "Электрика 220В", "Освещение", "Гарантия 1 год"],
+    imgs: [PRODUCT_IMAGE, FACTORY_IMAGE, HERO_IMAGE, CABIN_IMAGE] },
+  "5": { id: "5", name: "Хостблок на 4 места 6×3 м", type: "Хостблок", price: 480000, area: 18, dims: "6×3×2.7 м", badge: "Хит продаж",
+    desc: "Хостблок на 4 спальных места. 2 двухъярусные кровати, санузел, электрика. Металлокаркас 80×80 мм, утепление 100 мм. Для строительных бригад, вахтовиков, арендных объектов.",
+    tags: ["4 спальных места", "Санузел", "Минвата 100 мм", "Металлокаркас", "Электрика 220В", "Гарантия 1 год"],
+    imgs: [PRODUCT_IMAGE, CABIN_IMAGE, FACTORY_IMAGE, HERO_IMAGE] },
+  "6": { id: "6", name: "Хостблок на 8 мест 12×3 м", type: "Хостблок", price: 890000, area: 36, dims: "12×3×2.7 м", badge: "Можно жить зимой",
+    desc: "Хостблок на 8 спальных мест — готовое решение для временного проживания. 4 двухъярусные кровати, 2 санузла, электрика 220В. Утепление 150 мм, комфортно зимой.",
+    tags: ["8 спальных мест", "2 санузла", "Минвата 150 мм", "Металлокаркас 80×80 мм", "Электрика 220В", "Зима −40°C", "Гарантия 1 год", "Срок 7–14 дней"],
+    imgs: [CABIN_IMAGE, PRODUCT_IMAGE, FACTORY_IMAGE, HERO_IMAGE] },
+}
+
+const RELATED_PRODUCTS = [
+  { id: "1", name: "Бытовка 6×2.4 м", price: 189000, img: PRODUCT_IMAGE },
+  { id: "3", name: "Дачный домик 6×4 м", price: 420000, img: CABIN_IMAGE },
+  { id: "6", name: "Хостблок 12×3 м", price: 890000, img: CABIN_IMAGE },
 ]
 
-const fmt = (price: number) =>
-  new Intl.NumberFormat("ru-RU", { style: "currency", currency: "RUB", maximumFractionDigits: 0 }).format(price)
-
-const fmtShort = (price: number) => {
-  if (price >= 1000000) return `${(price / 1000000).toFixed(price % 1000000 === 0 ? 0 : 1)} млн`
-  return `${(price / 1000).toFixed(0)} тыс`
+function fmt(n: number) {
+  return new Intl.NumberFormat("ru-RU", { style: "currency", currency: "RUB", maximumFractionDigits: 0 }).format(n)
+}
+function fmtShort(n: number) {
+  if (n >= 1000000) return `${(n / 1000000).toFixed(1)} млн`
+  return `${(n / 1000).toFixed(0)} тыс`
 }
 
 export default function PropertyDetailPage() {
   const { id } = useParams()
-
-  const property = {
-    id: id,
-    title: "Хостблок на 8 мест 12×3 м",
-    type: "Хостблок",
-    squareFeet: 36,
-    dimensions: "12×3×2.7 м",
-    yearBuilt: 2024,
-    status: "Доступно",
-    price: 890000,
-    description:
-      "Хостблок на металлокаркасе 12×3 м — готовое решение для временного проживания рабочих и персонала. Вмещает 8 человек: 4 двухъярусные кровати, 2 санузла, электрика 220В. Каркас из профильной трубы 80×80 мм, обшивка металлопрофилем. Утепление минватой 100 мм. Изготовление 7–14 дней. Возможна любая кастомизация под задачи заказчика.",
-    tags: [
-      "Металлокаркас 80×80 мм",
-      "Металлопрофиль",
-      "Минвата 100 мм",
-      "Электрика 220В",
-      "Двойные двери",
-      "Пластиковые окна",
-      "Конвекторы",
-      "Доставка по РФ",
-      "Гарантия 1 год",
-      "Срок: 7–14 дней",
-    ],
-    images: [
-      "/placeholder.svg?height=600&width=800",
-      "/placeholder.svg?height=600&width=800",
-      "/placeholder.svg?height=600&width=800",
-      "/placeholder.svg?height=600&width=800",
-      "/placeholder.svg?height=600&width=800",
-    ],
-  }
-
-  // Модалка заказа
-  const [orderOpen, setOrderOpen] = useState(false)
-  const [budget, setBudget] = useState([property.price, Math.round(property.price * 1.3)])
-  const [deliveryAddress, setDeliveryAddress] = useState("")
-  const [deliveryOpen, setDeliveryOpen] = useState(false)
-  const [wishes, setWishes] = useState("")
+  const [activeImg, setActiveImg] = useState(0)
+  const [fullscreen, setFullscreen] = useState(false)
+  const [sent, setSent] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [name, setName] = useState("")
   const [phone, setPhone] = useState("")
-  const [messenger, setMessenger] = useState<string | null>(null)
+  const [msg, setMsg] = useState("")
 
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({ title: property.title, url: window.location.href })
-    } else {
-      navigator.clipboard.writeText(window.location.href)
-      alert("Ссылка скопирована!")
-    }
-  }
+  const product = STATIC_PRODUCTS[id || "1"] || STATIC_PRODUCTS["1"]
 
-  const handleOrderSubmit = (e: React.FormEvent) => {
+  const handleOrder = async (e: React.FormEvent) => {
     e.preventDefault()
-    alert("Заявка отправлена! Мы свяжемся с вами в ближайшее время.")
-    setOrderOpen(false)
+    setLoading(true)
+    await api.createOrder({ name, phone, message: msg, product_name: product.name, product_id: parseInt(product.id) })
+    setLoading(false)
+    setSent(true)
   }
 
-  const budgetMax = Math.max(property.price * 2, 3000000)
+  useEffect(() => { window.scrollTo(0, 0) }, [id])
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      {/* Хлебные крошки */}
-      <div className="mb-6 flex items-center gap-2 text-sm text-muted-foreground">
-        <Link to="/" className="flex items-center gap-1 hover:text-foreground">
-          <Home className="h-4 w-4" />
-          Главная
-        </Link>
-        <ChevronRight className="h-4 w-4" />
-        <Link to="/properties" className="hover:text-foreground">
-          Каталог
-        </Link>
-        <ChevronRight className="h-4 w-4" />
-        <span className="text-foreground line-clamp-1">{property.title}</span>
-      </div>
+    <div style={{ background: '#0B1730' }} className="min-h-screen pb-24">
 
-      {/* Заголовок + цена + кнопки */}
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-2 flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <Badge variant="outline" className="bg-green-100 text-green-800">{property.status}</Badge>
-            <Badge variant="outline">{property.type}</Badge>
-          </div>
-          <h1 className="text-2xl font-bold leading-snug">{property.title}</h1>
-          <div className="flex items-center gap-4 text-muted-foreground">
-            <div className="flex items-center gap-1.5">
-              <Square className="h-4 w-4" />
-              <span className="text-sm">{property.squareFeet} м²</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <Icon name="Ruler" size={16} />
-              <span className="text-sm">{property.dimensions}</span>
-            </div>
-          </div>
+      {/* Fullscreen */}
+      {fullscreen && (
+        <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center" onClick={() => setFullscreen(false)}>
+          <button className="absolute top-4 right-4 text-white/60 hover:text-white" onClick={() => setFullscreen(false)}>
+            <Icon name="X" size={28} />
+          </button>
+          <img src={product.imgs[activeImg]} alt="" className="max-w-full max-h-full object-contain rounded-xl" />
         </div>
-        <div className="flex flex-col items-start sm:items-end gap-3 shrink-0">
-          <p className="text-3xl font-bold">{fmt(property.price)}</p>
-          <div className="flex gap-2">
-            <Button size="lg" className="gap-2" onClick={() => setOrderOpen(true)}>
-              <ShoppingCart className="h-4 w-4" />
-              Заказать с доставкой
-            </Button>
-            <Button size="icon" variant="outline" onClick={handleShare} title="Поделиться">
-              <Share2 className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
+      )}
 
-      {/* Галерея 4:3 */}
-      <div className="mb-8 space-y-3">
-        <div className="relative w-full overflow-hidden rounded-lg" style={{ paddingTop: "75%" }}>
-          <img src={property.images[0]} alt={property.title} className="absolute inset-0 h-full w-full object-cover" />
+      <div className="container px-4 md:px-8 pt-8">
+        {/* Breadcrumbs */}
+        <div className="flex items-center gap-2 text-sm text-white/40 mb-8">
+          <Link to="/" className="hover:text-white transition-colors">Главная</Link>
+          <Icon name="ChevronRight" size={14} />
+          <Link to="/properties" className="hover:text-white transition-colors">Каталог</Link>
+          <Icon name="ChevronRight" size={14} />
+          <span className="text-white/70 line-clamp-1">{product.name}</span>
         </div>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {property.images.slice(1, 5).map((image, i) => (
-            <div key={i} className="relative overflow-hidden rounded-lg" style={{ paddingTop: "75%" }}>
-              <img src={image} alt={`${property.title} ${i + 2}`} className="absolute inset-0 h-full w-full object-cover" />
-            </div>
-          ))}
-        </div>
-      </div>
 
-      {/* Описание + Теги */}
-      <div className="space-y-8">
-        <div>
-          <h2 className="text-xl font-semibold mb-3">Описание</h2>
-          <p className="text-muted-foreground leading-relaxed">{property.description}</p>
+        <div className="grid lg:grid-cols-[1fr_420px] gap-10 xl:gap-16">
+          {/* Left: Gallery + info */}
+          <div>
+            {/* Main image */}
+            <div className="relative rounded-3xl overflow-hidden aspect-[16/10] mb-3 cursor-pointer group" onClick={() => setFullscreen(true)}>
+              <img src={product.imgs[activeImg]} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center"
+                style={{ background: 'rgba(0,0,0,0.3)' }}>
+                <div className="glass rounded-full p-3">
+                  <Icon name="Expand" size={22} className="text-white" />
+                </div>
+              </div>
+              <span className={`absolute top-4 left-4 bg-red-600 text-white text-sm font-bold px-4 py-1.5 rounded-full`}>{product.badge}</span>
+            </div>
+
+            {/* Thumbnails */}
+            <div className="flex gap-2 mb-8">
+              {product.imgs.map((img, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveImg(i)}
+                  className={`relative flex-1 rounded-xl overflow-hidden aspect-video transition-all duration-200 ${activeImg === i ? 'ring-2 ring-red-500 opacity-100' : 'opacity-50 hover:opacity-80'}`}
+                >
+                  <img src={img} alt="" className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+
+            {/* Title + specs */}
+            <div className="mb-8">
+              <p className="text-red-500 text-xs font-semibold uppercase tracking-widest mb-2">{product.type}</p>
+              <h1 className="font-montserrat text-3xl md:text-4xl font-extrabold text-white mb-4">{product.name}</h1>
+
+              <div className="flex flex-wrap gap-4 mb-6">
+                {[
+                  { icon: "Maximize2", label: `${product.area} м²` },
+                  { icon: "Ruler", label: product.dims },
+                  { icon: "Clock", label: "от 7 дней" },
+                  { icon: "Shield", label: "Гарантия 1 год" },
+                ].map(s => (
+                  <div key={s.label} className="flex items-center gap-2 text-white/60 text-sm">
+                    <Icon name={s.icon} size={14} className="text-red-400" />
+                    <span>{s.label}</span>
+                  </div>
+                ))}
+              </div>
+
+              <p className="text-white/60 leading-relaxed mb-6">{product.desc}</p>
+
+              {/* Tags */}
+              <div className="flex flex-wrap gap-2">
+                {product.tags.map(t => (
+                  <span key={t} className="flex items-center gap-1.5 text-xs text-white/70 px-3 py-1.5 rounded-full border border-white/10"
+                    style={{ background: 'rgba(255,255,255,0.04)' }}>
+                    <Icon name="Check" size={11} className="text-red-400" />
+                    {t}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Why us mini */}
+            <div className="rounded-2xl p-5 mb-8" style={{ background: '#111F40' }}>
+              <h3 className="font-montserrat font-bold text-white mb-4 text-sm uppercase tracking-wider">Почему выбирают нас</h3>
+              <div className="grid sm:grid-cols-2 gap-3">
+                {[
+                  { icon: "Factory", text: "Собственное производство без посредников" },
+                  { icon: "Truck", text: "Доставка манипулятором по всей России" },
+                  { icon: "FileText", text: "Официальный договор с гарантией" },
+                  { icon: "Thermometer", text: "Утепление для работы при −40°C" },
+                ].map(w => (
+                  <div key={w.text} className="flex items-start gap-2.5">
+                    <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5" style={{ background: 'rgba(220,38,38,0.15)' }}>
+                      <Icon name={w.icon} size={13} className="text-red-400" />
+                    </div>
+                    <p className="text-white/60 text-sm leading-snug">{w.text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right: CTA */}
+          <div className="lg:sticky lg:top-24 h-fit">
+            <div className="rounded-3xl overflow-hidden shadow-premium" style={{ background: '#111F40' }}>
+              <div className="p-6 border-b border-white/8">
+                <p className="text-white/40 text-xs mb-1">Стоимость</p>
+                <p className="font-montserrat text-4xl font-black text-white mb-0.5">от {fmt(product.price)}</p>
+                <p className="text-white/40 text-xs">Окончательная цена — после расчёта</p>
+              </div>
+
+              <div className="p-6">
+                {sent ? (
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: 'rgba(16,185,129,0.15)' }}>
+                      <Icon name="CheckCircle" size={32} className="text-emerald-400" />
+                    </div>
+                    <p className="font-montserrat font-bold text-white text-lg mb-1">Заявка отправлена!</p>
+                    <p className="text-white/50 text-sm">Свяжемся за 15 минут</p>
+                  </div>
+                ) : (
+                  <form onSubmit={handleOrder} className="space-y-3">
+                    <h3 className="font-montserrat font-bold text-white text-lg mb-4">Получить расчёт</h3>
+                    <div>
+                      <Label className="text-white/60 text-xs mb-1.5 block">Ваше имя</Label>
+                      <Input value={name} onChange={e => setName(e.target.value)} placeholder="Александр"
+                        className="bg-white/5 border-white/10 text-white placeholder:text-white/25 focus:border-red-500/60 rounded-xl" required />
+                    </div>
+                    <div>
+                      <Label className="text-white/60 text-xs mb-1.5 block">Телефон</Label>
+                      <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+7 (___) ___-__-__"
+                        className="bg-white/5 border-white/10 text-white placeholder:text-white/25 focus:border-red-500/60 rounded-xl" required />
+                    </div>
+                    <div>
+                      <Label className="text-white/60 text-xs mb-1.5 block">Пожелания (необязательно)</Label>
+                      <Textarea value={msg} onChange={e => setMsg(e.target.value)} rows={3}
+                        placeholder="Размер, комплектация, адрес доставки..."
+                        className="bg-white/5 border-white/10 text-white placeholder:text-white/25 focus:border-red-500/60 rounded-xl resize-none" />
+                    </div>
+                    <Button type="submit" disabled={loading} className="w-full h-13 bg-red-600 hover:bg-red-700 text-white font-semibold text-base rounded-xl shadow-lg shadow-red-900/30 transition-all duration-200 hover:shadow-red-900/50 hover:scale-[1.02] mt-1">
+                      {loading ? "Отправляем..." : "Получить расчёт бесплатно"}
+                    </Button>
+                    <div className="flex items-center justify-center gap-4 pt-1">
+                      <a href="https://t.me/" target="_blank" rel="noreferrer"
+                        className="flex items-center gap-1.5 text-xs text-white/40 hover:text-blue-400 transition-colors">
+                        <Icon name="Send" size={13} />Telegram
+                      </a>
+                      <span className="text-white/15">·</span>
+                      <a href="https://wa.me/" target="_blank" rel="noreferrer"
+                        className="flex items-center gap-1.5 text-xs text-white/40 hover:text-emerald-400 transition-colors">
+                        <Icon name="MessageCircle" size={13} />WhatsApp
+                      </a>
+                    </div>
+                    <p className="text-center text-white/30 text-xs">Без спама · Ответим за 15 минут</p>
+                  </form>
+                )}
+              </div>
+
+              <div className="px-6 pb-5 flex items-center gap-3 border-t border-white/8 pt-4">
+                <div className="w-9 h-9 rounded-full bg-emerald-500/15 flex items-center justify-center">
+                  <Icon name="Phone" size={15} className="text-emerald-400" />
+                </div>
+                <div>
+                  <p className="text-white font-semibold text-sm">+7 (800) 000-00-00</p>
+                  <p className="text-white/40 text-xs">Пн–Пт 9:00–18:00</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div>
-          <h2 className="text-xl font-semibold mb-3">Характеристики</h2>
-          <div className="flex flex-wrap gap-2">
-            {property.tags.map((tag, i) => (
-              <span key={i} className="rounded-full border border-input bg-muted px-3 py-1 text-sm font-medium">
-                {tag}
-              </span>
+
+        {/* Related */}
+        <div className="mt-20">
+          <h2 className="font-montserrat text-2xl font-bold text-white mb-6">Похожие модели</h2>
+          <div className="grid sm:grid-cols-3 gap-5">
+            {RELATED_PRODUCTS.filter(r => r.id !== id).slice(0, 3).map(r => (
+              <Link key={r.id} to={`/properties/${r.id}`} className="group block">
+                <div className="rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.02]" style={{ background: '#111F40' }}>
+                  <div className="h-36 overflow-hidden">
+                    <img src={r.img} alt={r.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-montserrat font-bold text-white text-sm mb-1 group-hover:text-red-400 transition-colors">{r.name}</h3>
+                    <p className="font-montserrat font-black text-white">от {fmtShort(r.price)} ₽</p>
+                  </div>
+                </div>
+              </Link>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Модалка заказа */}
-      <Dialog open={orderOpen} onOpenChange={setOrderOpen}>
-        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Заказать с доставкой</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleOrderSubmit} className="space-y-5 pt-1">
-
-            {/* Выбранный товар */}
-            <div className="rounded-lg border bg-muted/40 p-3 flex items-center gap-3">
-              <div className="relative w-20 shrink-0 overflow-hidden rounded-md" style={{ paddingTop: "33%" }}>
-                <img src={property.images[0]} alt={property.title} className="absolute inset-0 h-full w-full object-cover" />
-              </div>
-              <div className="min-w-0">
-                <p className="font-medium text-sm line-clamp-2">{property.title}</p>
-                <p className="text-sm text-muted-foreground">{property.squareFeet} м² · {property.dimensions}</p>
-                <p className="text-sm font-bold">{fmt(property.price)}</p>
-              </div>
-            </div>
-
-            {/* Бюджет от/до */}
-            <div className="space-y-3">
-              <Label>Бюджет</Label>
-              <Slider
-                value={budget}
-                min={100000}
-                max={budgetMax}
-                step={50000}
-                onValueChange={setBudget}
-              />
-              <div className="flex justify-between text-sm text-muted-foreground">
-                <span>от {fmtShort(budget[0])} ₽</span>
-                <span>до {budget[1] >= budgetMax ? `${fmtShort(budgetMax)}+ ₽` : `${fmtShort(budget[1])} ₽`}</span>
-              </div>
-            </div>
-
-            {/* Адрес доставки */}
-            <div className="space-y-2">
-              <Label>Адрес доставки</Label>
-              <button
-                type="button"
-                onClick={() => setDeliveryOpen(true)}
-                className="flex h-10 w-full items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm text-left hover:bg-accent transition-colors"
-              >
-                <Icon name="MapPin" size={15} className="text-muted-foreground shrink-0" />
-                <span className={deliveryAddress ? "text-foreground" : "text-muted-foreground"}>
-                  {deliveryAddress || "Укажите адрес доставки"}
-                </span>
-              </button>
-            </div>
-
-            {/* Пожелания */}
-            <div className="space-y-2">
-              <Label htmlFor="wishes">Пожелания</Label>
-              <Textarea
-                id="wishes"
-                placeholder="Утепление, цвет, дополнительные двери, планировка..."
-                value={wishes}
-                onChange={(e) => setWishes(e.target.value)}
-                className="min-h-[80px]"
-              />
-            </div>
-
-            {/* Имя + Телефон */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label htmlFor="order-name">Ваше имя</Label>
-                <Input id="order-name" placeholder="Иван" value={name} onChange={(e) => setName(e.target.value)} required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="order-phone">Телефон</Label>
-                <Input id="order-phone" type="tel" placeholder="+7 (___) ___-__-__" value={phone} onChange={(e) => setPhone(e.target.value)} required />
-              </div>
-            </div>
-
-            {/* Мессенджер */}
-            <div className="space-y-2">
-              <Label>Куда написать</Label>
-              <div className="grid grid-cols-3 gap-2">
-                {MESSENGER_OPTIONS.map((m) => (
-                  <button
-                    key={m.value}
-                    type="button"
-                    onClick={() => setMessenger(messenger === m.value ? null : m.value)}
-                    className={`rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
-                      messenger === m.value
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-input bg-background hover:bg-accent hover:text-accent-foreground"
-                    }`}
-                  >
-                    {m.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <Button type="submit" size="lg" className="w-full">
-              Оставить заявку
-            </Button>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Диалог адреса */}
-      <Dialog open={deliveryOpen} onOpenChange={setDeliveryOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Адрес доставки</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 pt-1">
-            <div className="space-y-2">
-              <Label>Введите адрес</Label>
-              <Input
-                placeholder="Город, улица, дом..."
-                value={deliveryAddress}
-                onChange={(e) => setDeliveryAddress(e.target.value)}
-              />
-            </div>
-            <div className="flex h-44 items-center justify-center rounded-md border bg-muted flex-col gap-2 text-muted-foreground">
-              <Icon name="Map" size={30} />
-              <span className="text-sm">Выбор по карте</span>
-              <span className="text-xs text-center px-6">Будет подключена после настройки API</span>
-            </div>
-            <Button className="w-full" onClick={() => setDeliveryOpen(false)}>Подтвердить адрес</Button>
+      {/* Fixed bottom CTA on mobile */}
+      <div className="fixed bottom-0 left-0 right-0 lg:hidden z-40 p-4 border-t"
+        style={{ background: 'rgba(11,23,48,0.95)', backdropFilter: 'blur(16px)', borderColor: 'rgba(255,255,255,0.08)' }}>
+        <div className="flex items-center gap-3">
+          <div className="flex-1">
+            <p className="text-white/50 text-xs">Стоимость</p>
+            <p className="font-montserrat font-black text-white">от {fmt(product.price)}</p>
           </div>
-        </DialogContent>
-      </Dialog>
+          <Button className="bg-red-600 hover:bg-red-700 text-white rounded-xl px-6 font-semibold shadow-lg shadow-red-900/40"
+            onClick={() => document.querySelector('form')?.scrollIntoView({ behavior: 'smooth' })}>
+            Получить расчёт
+          </Button>
+        </div>
+      </div>
     </div>
   )
 }
