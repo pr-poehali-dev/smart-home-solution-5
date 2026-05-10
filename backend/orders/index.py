@@ -18,7 +18,7 @@ def check_auth(event):
     return row is not None
 
 def handler(event: dict, context) -> dict:
-    """Заявки от клиентов. POST / — создать заявку (публично), GET / — список заявок (только админ), PUT / — сменить статус (только админ)."""
+    """CRM: заявки. POST — создать (публично), GET — список (админ), PUT — обновить (админ)."""
     headers = {"Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Content-Type, X-Admin-Token", "Content-Type": "application/json"}
 
     if event.get("httpMethod") == "OPTIONS":
@@ -33,9 +33,21 @@ def handler(event: dict, context) -> dict:
         if not body.get("name") or not body.get("phone"):
             cur.close(); conn.close()
             return {"statusCode": 400, "headers": headers, "body": json.dumps({"error": "Имя и телефон обязательны"})}
+        deal = body.get("deal_amount") or body.get("budget_max")
+        comm = int(float(deal) * 0.05) if deal else None
         cur.execute(
-            "INSERT INTO orders (name, phone, email, product_id, product_name, message, delivery_address, budget_min, budget_max) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id",
-            (body.get("name"), body.get("phone"), body.get("email"), body.get("product_id"), body.get("product_name"), body.get("message"), body.get("delivery_address"), body.get("budget_min"), body.get("budget_max"))
+            """INSERT INTO orders (name, phone, email, product_id, product_name, message, delivery_address,
+               budget_min, budget_max, status, kanban_status, source, region, deal_amount, commission_amount,
+               commission_rate, manager, messenger, notes)
+               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,'new',%s,%s,%s,%s,%s,5.00,%s,%s,%s) RETURNING id""",
+            (body.get("name"), body.get("phone"), body.get("email"),
+             body.get("product_id"), body.get("product_name"),
+             body.get("message"), body.get("delivery_address"),
+             body.get("budget_min"), body.get("budget_max"),
+             body.get("kanban_status","new"),
+             body.get("source","website"), body.get("region"),
+             deal, comm,
+             body.get("manager"), body.get("messenger"), body.get("notes"))
         )
         new_id = cur.fetchone()[0]
         conn.commit()
@@ -46,13 +58,21 @@ def handler(event: dict, context) -> dict:
         if not check_auth(event):
             cur.close(); conn.close()
             return {"statusCode": 401, "headers": headers, "body": json.dumps({"error": "Нет доступа"})}
-        cur.execute("SELECT id, name, phone, email, product_name, message, delivery_address, budget_min, budget_max, status, created_at FROM orders ORDER BY created_at DESC")
-        rows = cur.fetchall()
-        cols = ["id","name","phone","email","product_name","message","delivery_address","budget_min","budget_max","status","created_at"]
+        cur.execute("""SELECT id, name, phone, email, product_name, message, delivery_address,
+                       budget_min, budget_max, status, kanban_status, source, region,
+                       deal_amount, commission_amount, commission_rate, commission_paid,
+                       manager, messenger, notes, created_at, updated_at
+                       FROM orders ORDER BY created_at DESC""")
+        cols = ["id","name","phone","email","product_name","message","delivery_address",
+                "budget_min","budget_max","status","kanban_status","source","region",
+                "deal_amount","commission_amount","commission_rate","commission_paid",
+                "manager","messenger","notes","created_at","updated_at"]
         orders = []
-        for row in rows:
+        for row in cur.fetchall():
             o = dict(zip(cols, row))
             o["created_at"] = o["created_at"].isoformat() if o["created_at"] else None
+            o["updated_at"] = o["updated_at"].isoformat() if o["updated_at"] else None
+            o["commission_rate"] = float(o["commission_rate"]) if o["commission_rate"] else 5.0
             orders.append(o)
         cur.close(); conn.close()
         return {"statusCode": 200, "headers": headers, "body": json.dumps(orders, ensure_ascii=False)}
@@ -62,7 +82,21 @@ def handler(event: dict, context) -> dict:
             cur.close(); conn.close()
             return {"statusCode": 401, "headers": headers, "body": json.dumps({"error": "Нет доступа"})}
         body = json.loads(event.get("body") or "{}")
-        cur.execute("UPDATE orders SET status=%s, updated_at=NOW() WHERE id=%s", (body.get("status"), body.get("id")))
+        oid = body.get("id")
+        deal = body.get("deal_amount")
+        rate = float(body.get("commission_rate", 5.0))
+        comm = int(deal * rate / 100) if deal else body.get("commission_amount")
+        cur.execute("""UPDATE orders SET
+            status=%s, kanban_status=%s, deal_amount=%s, commission_amount=%s,
+            commission_rate=%s, commission_paid=%s, manager=%s, source=%s,
+            region=%s, notes=%s, messenger=%s, product_name=%s, updated_at=NOW()
+            WHERE id=%s""",
+            (body.get("status","new"), body.get("kanban_status","new"),
+             deal, comm, rate,
+             body.get("commission_paid", False),
+             body.get("manager"), body.get("source"),
+             body.get("region"), body.get("notes"),
+             body.get("messenger"), body.get("product_name"), oid))
         conn.commit()
         cur.close(); conn.close()
         return {"statusCode": 200, "headers": headers, "body": json.dumps({"ok": True})}

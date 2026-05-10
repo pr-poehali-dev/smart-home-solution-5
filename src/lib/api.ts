@@ -3,6 +3,7 @@ const URLS = {
   products: "https://functions.poehali.dev/a878ccac-511e-4f39-9aaa-0b95fac33530",
   orders: "https://functions.poehali.dev/8b20d717-4fa0-40b9-bf11-3b4b72edd30f",
   stats: "https://functions.poehali.dev/71f05c54-9e86-400c-9e08-0bd2d1dc508c",
+  crmStats: "https://functions.poehali.dev/ade4ffc3-2fe5-40de-a955-d0ba9d80d680",
 };
 
 function getToken() {
@@ -35,9 +36,15 @@ export const api = {
   getOrders: () =>
     fetch(URLS.orders, { method: "GET", headers: authHeaders() }).then((r) => r.json()),
 
+  updateOrder: (data: object) =>
+    fetch(URLS.orders, { method: "PUT", headers: authHeaders(), body: JSON.stringify(data) }).then((r) => r.json()),
+
   updateOrderStatus: (id: number, status: string) =>
     fetch(URLS.orders, { method: "PUT", headers: authHeaders(), body: JSON.stringify({ id, status }) }).then((r) => r.json()),
 
   getStats: () =>
     fetch(URLS.stats, { method: "GET", headers: authHeaders() }).then((r) => r.json()),
+
+  getCrmStats: () =>
+    fetch(URLS.crmStats, { method: "GET", headers: authHeaders() }).then((r) => r.json()),
 };
